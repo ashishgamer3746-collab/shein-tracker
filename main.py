@@ -20,32 +20,32 @@ def handle_commands(message):
         msg = (f"👑 *SHEIN TRACKER PRO*\n\n"
                f"📊 Status: {status}\n"
                f"🔍 Total Scans: {total_scans}\n"
-               f"🕒 Frequency: Every 60s\n\n"
-               f"Bot background mein scan kar raha hai...")
+               f"Bot scan kar raha hai...")
         bot.reply_to(message, msg, parse_mode='Markdown')
 
 def scanner_loop():
     global total_scans
-    urls = [
-        "https://m.shein.in/in/SHEIN-Verse-vc-75677.html",
-        "https://m.shein.in/in/flash-sale-sc-00500122.html"
-    ]
+    url = "https://m.shein.in/in/SHEIN-Verse-vc-75677.html"
     while is_scanning:
-        for url in urls:
-            try:
-                total_scans += 1
-                response = scraper.get(url, timeout=30)
-                content = response.text.lower()
-                if "in stock" in content or "add to cart" in content:
-                    bot.send_message(ADMIN_ID, f"🚨 *STOCK ALERT!* 🚨\n\nItem mil gaya hai!\n🔗 [Click to Buy]({url})", parse_mode='Markdown')
-            except Exception as e:
-                print(f"Scan Error: {e}")
+        try:
+            total_scans += 1
+            response = scraper.get(url, timeout=30)
+            if "in stock" in response.text.lower() or "add to cart" in response.text.lower():
+                bot.send_message(ADMIN_ID, f"🚨 *STOCK ALERT!* 🚨\n\nLink: {url}")
+        except Exception as e:
+            print(f"Scan Error (VPN check karo): {e}")
         time.sleep(60)
 
 if __name__ == "__main__":
+    # 1. Scanner start karo
     Thread(target=scanner_loop, daemon=True).start()
+    print("🚀 Scanner Started...")
+    
+    # 2. Telegram message sunna start karo (Ye fix hai)
     while True:
         try:
+            print("🤖 Bot is listening for commands...")
             bot.polling(none_stop=True, interval=0, timeout=20)
         except Exception as e:
+            print(f"Polling Error: {e}")
             time.sleep(5)
